@@ -10,15 +10,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.sun.tools.javac.comp.Todo;
 
 /*
-    * This file contains an example of a Linear "OpMode".
-    * An OpMode is a 'program' that runs in either the autonomous or the TeleOp period of an FTC match.
-    * The names of OpModes appear on the menu of the FTC Driver Station.
-    * When a selection is made from the menu, the corresponding OpMode is executed.
-    *
-    * LinearOpMode is as its written and reads the code line by line. In my opinion I feel like the
-    * formatting of LinearOpMode is much better than OpMode.
-    *
-    * This guide is also made in context that you know the basics of java, so keep up.
+* This file contains an example of a Linear "OpMode".
+* An OpMode is a 'program' that runs in either the autonomous or the TeleOp period of an FTC match.
+* The names of OpModes appear on the menu of the FTC Driver Station.
+* When a selection is made from the menu, the corresponding OpMode is executed.
+*
+* LinearOpMode is as its written and reads the code line by line. In my opinion I feel like the
+* formatting of LinearOpMode is much better than OpMode.
+*
+* This guide is also made in context that you know the basics of java, so keep up.
 */
 
 @Disabled
