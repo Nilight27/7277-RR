@@ -11,7 +11,7 @@ import com.sun.tools.javac.comp.Todo;
 /*
 *This class is to teach you how to use the two different types of servos
 * A Position Servo and a Continuous Rotation Servo/360 Servo or (CRServo) for short
-* the main difference between the two is is that a Pos Servo move 180 degrees and is only move by setting it to a certain Pos
+* the main difference between the two is that a Pos Servo move 180 degrees and is only moved by setting it to a certain Pos
 * A CRServo can move as much as it wants and has no limits, it can do a full 360 rotation and continue doing it
 * CRServos when coded are basically treated the same as a motor
 */
@@ -25,8 +25,8 @@ public class BasicServoCode extends LinearOpMode {
     /*
     * The only difference between the 2 is that when specifically programming a CRServo you call it instead
     * just calling Servo.
-    * if your having trouble figuring out if your servo is a CRServo or a PosServo make code for a CRServo and test.
-    * if your servo only moves a bit when testing it and cant make a 360 turn then it is just a regular servo
+    * if you're having trouble figuring out if your servo is a CRServo or a PosServo make code for a CRServo and test.
+    * if you're servo only moves a bit when testing it and cant make a 360 turn then it is just a regular servo
     * Note: there is a board that switches PosServos to CRServos
     */
     private CRServo crServo;
@@ -56,6 +56,7 @@ public class BasicServoCode extends LinearOpMode {
                 crServo.setPower(0.0);
             }
 
+            //Add telemetry Pls I was to lazy to add so make sure u add it yourself
 
         }
 
