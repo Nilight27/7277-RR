@@ -26,6 +26,7 @@ import com.sun.tools.javac.comp.Todo;
 public class BasicDriveCode extends LinearOpMode {
 
     //This is where you call your Motors, Servos, ect.
+    // when something is equal to null it means it is equal to nothing
     private final ElapsedTime runtime = new ElapsedTime();
     private DcMotor FL = null;
     private DcMotor BL = null;
@@ -95,7 +96,9 @@ public class BasicDriveCode extends LinearOpMode {
 
             double max;
 
-            double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            //Note: when trying to use controller commands that are not button presses like joysticks and triggers
+            // are supposed to be put into a variable to access the numbers
+            double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value because of the (-) sign. When pushing forward usually the value is positive btw
             double lateral = gamepad1.left_stick_x * 1.1;
             double yaw = gamepad1.right_stick_x;
 
@@ -131,6 +134,8 @@ public class BasicDriveCode extends LinearOpMode {
             BR.setPower(rightBackPower);
 
             // Show the elapsed game time and wheel power.
+            //telemetry.addData() is to spew out numbers to your Driver Station
+            //telemetry.update() is used to update any changing values during the period the code is running
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
