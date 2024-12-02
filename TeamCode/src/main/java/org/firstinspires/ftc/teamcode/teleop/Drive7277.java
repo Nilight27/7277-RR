@@ -136,8 +136,6 @@ public class Drive7277 extends LinearOpMode {
 
             arm.move(power, powerA, gamepad1.dpad_up, gamepad1.dpad_right, gamepad1.dpad_down);
 
-
-
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Front left/Right", "%4.2f, %4.2f", leftFrontPower, rightFrontPower);
@@ -148,5 +146,3 @@ public class Drive7277 extends LinearOpMode {
         }
     }
 }
-
-
