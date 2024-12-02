@@ -57,8 +57,6 @@ public class BasicServoCode extends LinearOpMode {
             }
 
             //Add telemetry Pls I was to lazy to add so make sure u add it yourself
-
         }
-
     }
 }
