@@ -4,9 +4,11 @@ import android.graphics.Path;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -26,6 +28,17 @@ public class Drive7277 extends LinearOpMode {
     double speedLimiter = 1;
     double limit = 1.65;
     public Boolean movement;
+    private PIDController controller1, controller2;
+    public static double p = 0.05, i = 0, d = 0.001;
+    public static double p2 = 0.029, i2 = 0, d2 = 0;
+    public static double f = 0.0005, f2 = 0.01;
+    public static int target = 100, target2 = 0;
+
+
+    public static final double ticks = 1440;
+    public static final double ticks2 = 960;
+    boolean change = true;
+
 
     @Override
     public void runOpMode() {
@@ -36,8 +49,14 @@ public class Drive7277 extends LinearOpMode {
         BL = hardwareMap.get(DcMotor.class, "BL");
         FR = hardwareMap.get(DcMotor.class, "FR");
         BR = hardwareMap.get(DcMotor.class, "BR");
+
         Claw claw = new Claw(hardwareMap);
-        Arm arm = new Arm(hardwareMap, hardwareMap);
+        Arm arm = new Arm(hardwareMap);
+
+        controller1 = new PIDController(p,i,d);
+        controller2 = new PIDController(p2,i2,d2);
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
 
 
 
@@ -69,6 +88,8 @@ public class Drive7277 extends LinearOpMode {
 
 
 
+
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         // Wait for the game to start (driver presses PLAY)
@@ -82,6 +103,33 @@ public class Drive7277 extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+            if(gamepad2.x){
+                change =! change;
+            }
+
+
+            if(change){
+                controller1.setPID(p,i,d);
+                int pivotPos = arm.pivot.getCurrentPosition();
+                double pid = controller1.calculate(pivotPos, target);
+                double ff = Math.cos(Math.toRadians(target/ticks)) * f;
+
+                double ppower = pid + ff;
+                arm.pivot.setPower(ppower);
+
+                if(gamepad2.a){
+                    target = 1700;
+                }
+                if(gamepad2.b){
+                    target = 100;
+                }
+                if(gamepad2.y){
+                    target = 125;
+                }
+            }
+
+
+
             if (gamepad1.dpad_down) {
                 speedLimiter = 2;
             } else if (gamepad1.dpad_up) {
@@ -92,7 +140,7 @@ public class Drive7277 extends LinearOpMode {
 
             double max;
 
-            double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+            double axial = gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
             double lateral = -gamepad1.left_stick_x * 1.1;
             double yaw = -gamepad1.right_stick_x;
 
@@ -129,12 +177,16 @@ public class Drive7277 extends LinearOpMode {
 
             double rotate = gamepad2.right_stick_x;
 
-            claw.move(rotate*2);
+            claw.move(rotate);
 
-            double power = gamepad2.left_stick_y;
-            double powerA = gamepad2.right_stick_y;
+            if(!change){
+                double power = gamepad2.left_stick_y;
+                double powerA = gamepad2.left_stick_x;
 
-            arm.move(power, powerA, gamepad1.dpad_up, gamepad1.dpad_right, gamepad1.dpad_down);
+                arm.move(power, powerA, gamepad2.dpad_up, gamepad2.dpad_right, gamepad2.dpad_down);
+            }
+
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -142,6 +194,9 @@ public class Drive7277 extends LinearOpMode {
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.addData("Current speedLimiter: ", speedLimiter);
             telemetry.addData("Open/Close", check);
+            telemetry.addData("Target", target);
+            telemetry.addData("Change", change);
+
             telemetry.update();
         }
     }

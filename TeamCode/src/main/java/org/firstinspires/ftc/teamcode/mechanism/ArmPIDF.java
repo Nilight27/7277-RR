@@ -13,17 +13,19 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 @TeleOp
 public class ArmPIDF extends LinearOpMode {
     private PIDController controller1, controller2;
-    public static double p = 0, i = 0, d = 0;
-    public static double p2 = 0, i2 = 0, d2 = 0;
-    public static double f = 0, f2 = 2;
+    public static double p = 0.058, i = 0, d = 0;
+    public static double p2 = 0.029, i2 = 0, d2 = 0;
+    public static double f = 0.00005, f2 = 0.01;
     public static int target = 0, target2 = 0;
 
 
-    public static final double ticks = 960;
+    public static final double ticks = 1440;
+    public static final double ticks2 = 960;
+
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        Arm arm = new Arm(hardwareMap,hardwareMap);
+    public void runOpMode() throws  InterruptedException {
+        Arm arm = new Arm(hardwareMap);
         controller1 = new PIDController(p,i,d);
         controller2 = new PIDController(p2,i2,d2);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -46,14 +48,18 @@ public class ArmPIDF extends LinearOpMode {
             controller2.setPID(p2,i2,d2);
             int extendPos = arm.arm.getCurrentPosition();
             double pid2 = controller2.calculate(extendPos, target2);
-            double ff2 = Math.cos(Math.toRadians(target2/ticks)) * f2;
+            double ff2 = Math.cos(Math.toRadians(target2/ticks2)) * f2;
 
             double power2 = pid2 + ff2;
             arm.arm.setPower(power2);
 
             //Telemetry
             telemetry.addData("Pivot Pos", pivotPos);
+            telemetry.addData("Extender Pos", extendPos);
+
             telemetry.addData("Target", target);
+            telemetry.addData("Target2", target2);
+
             telemetry.update();
         }
     }

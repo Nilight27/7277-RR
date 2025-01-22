@@ -21,7 +21,6 @@ import com.sun.tools.javac.comp.Todo;
 * This guide is also made in context that you know the basics of java, so keep up.
 */
 
-@Disabled
 @TeleOp
 public class BasicDriveCode extends LinearOpMode {
 
@@ -99,8 +98,8 @@ public class BasicDriveCode extends LinearOpMode {
             //Note: when trying to use controller commands that are not button presses like joysticks and triggers
             // are supposed to be put into a variable to access the numbers
             double axial = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value because of the (-) sign. When pushing forward usually the value is positive btw
-            double lateral = gamepad1.left_stick_x * 1.1;
-            double yaw = gamepad1.right_stick_x;
+            double lateral = -gamepad1.left_stick_x * 1.1;
+            double yaw = -  gamepad1.right_stick_x;
 
             // Combine the joystick requests for each axis-motion to determine each wheel's power.
             // Set up a variable for each drive wheel to save the power level for telemetry.

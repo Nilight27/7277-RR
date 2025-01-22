@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.mechanism;
 
+import static android.os.SystemClock.sleep;
+
+import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -10,7 +13,7 @@ public class Claw {
 
     public CRServo claw;
     public ClawConstants CC;
-    public enum Action{
+    public enum Move{
             OPEN,
             CLOSE,
             REG
@@ -26,5 +29,13 @@ public class Claw {
             claw.setPower(0);
         }
 
+    }
+
+    public Action moveTo(Move move){
+        if (move == Move.OPEN){
+            claw.setPower(-1);
+            sleep(2000);
+        }
+        return null;
     }
 }
