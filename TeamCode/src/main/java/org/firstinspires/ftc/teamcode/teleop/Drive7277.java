@@ -28,16 +28,7 @@ public class Drive7277 extends LinearOpMode {
     double speedLimiter = 1;
     double limit = 1.65;
     public Boolean movement;
-    private PIDController controller1, controller2;
-    public static double p = 0.05, i = 0, d = 0.001;
-    public static double p2 = 0.029, i2 = 0, d2 = 0;
-    public static double f = 0.0005, f2 = 0.01;
-    public static int target = 100, target2 = 0;
 
-
-    public static final double ticks = 1440;
-    public static final double ticks2 = 960;
-    boolean change = true;
 
 
     @Override
@@ -53,8 +44,6 @@ public class Drive7277 extends LinearOpMode {
         Claw claw = new Claw(hardwareMap);
         Arm arm = new Arm(hardwareMap);
 
-        controller1 = new PIDController(p,i,d);
-        controller2 = new PIDController(p2,i2,d2);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
 
@@ -103,40 +92,13 @@ public class Drive7277 extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            if(gamepad2.x){
-                change =! change;
-            }
-
-
-            if(change){
-                controller1.setPID(p,i,d);
-                int pivotPos = arm.pivot.getCurrentPosition();
-                double pid = controller1.calculate(pivotPos, target);
-                double ff = Math.cos(Math.toRadians(target/ticks)) * f;
-
-                double ppower = pid + ff;
-                arm.pivot.setPower(ppower);
-
-                if(gamepad2.a){
-                    target = 1700;
+                if (gamepad1.dpad_down) {
+                    speedLimiter = 2;
+                } else if (gamepad1.dpad_up) {
+                    speedLimiter = 1;
+                } else if (gamepad1.dpad_right) {
+                    speedLimiter = 1.65;
                 }
-                if(gamepad2.b){
-                    target = 100;
-                }
-                if(gamepad2.y){
-                    target = 125;
-                }
-            }
-
-
-
-            if (gamepad1.dpad_down) {
-                speedLimiter = 2;
-            } else if (gamepad1.dpad_up) {
-                speedLimiter = 1;
-            } else if (gamepad1.dpad_right) {
-                speedLimiter = 1.65;
-            }
 
             double max;
 
@@ -179,13 +141,10 @@ public class Drive7277 extends LinearOpMode {
 
             claw.move(rotate);
 
-            if(!change){
-                double power = gamepad2.left_stick_y;
-                double powerA = gamepad2.left_stick_x;
+            double power = gamepad2.left_stick_y;
+            double powerA = gamepad2.left_stick_x;
 
-                arm.move(power, powerA, gamepad2.dpad_up, gamepad2.dpad_right, gamepad2.dpad_down);
-            }
-
+            arm.move(power, powerA, gamepad2.dpad_up, gamepad2.dpad_right, gamepad2.dpad_down);
 
 
             // Show the elapsed game time and wheel power.
@@ -194,8 +153,6 @@ public class Drive7277 extends LinearOpMode {
             telemetry.addData("Back  left/Right", "%4.2f, %4.2f", leftBackPower, rightBackPower);
             telemetry.addData("Current speedLimiter: ", speedLimiter);
             telemetry.addData("Open/Close", check);
-            telemetry.addData("Target", target);
-            telemetry.addData("Change", change);
 
             telemetry.update();
         }

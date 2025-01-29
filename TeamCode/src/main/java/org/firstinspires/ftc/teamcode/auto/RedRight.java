@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -32,7 +33,7 @@ public class RedRight extends LinearOpMode {
 
         Pose2d initialPose = new Pose2d(10, -72,Math.PI/2);
         Pose2d initialPose2 = new Pose2d(10, -65,Math.PI/2);
-        Pose2d initialPose3 = new Pose2d(-43, -65,Math.PI/2);
+        Pose2d initialPose3 = new Pose2d(10, -40,Math.PI/2);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Pivot pivot = new Pivot(hardwareMap);
         Claw claw = new Claw(hardwareMap);
@@ -42,16 +43,18 @@ public class RedRight extends LinearOpMode {
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
                 .lineToY(-65);
 
-        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose2)
-                .lineToY(-43);
+        TrajectoryActionBuilder tab2 = tab1.endTrajectory().fresh()
+                .lineToY(-42);
 
-        TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
-                .lineToY(-45);
-                sleep(2000);
+        TrajectoryActionBuilder tab3 = tab2.endTrajectory().fresh()
+                .waitSeconds(2)
+                .lineToY(-50);
 
 
 
-        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
+
+        Action trajectoryActionCloseOut = tab3.endTrajectory().fresh()
+                .turnTo(Math.PI)
                 .setTangent(0)
                 .lineToX(60)
                 .build();
@@ -64,8 +67,10 @@ public class RedRight extends LinearOpMode {
 
         Action trajectoryActionChosen;
         Action trajectoryActionChosen2;
+        Action trajectoryActionChosen3;
         trajectoryActionChosen = tab1.build();
         trajectoryActionChosen2 = tab2.build();
+        trajectoryActionChosen3 = tab3.build();
 
         Actions.runBlocking(
                 new SequentialAction(
@@ -74,7 +79,7 @@ public class RedRight extends LinearOpMode {
                         trajectoryActionChosen2,
                         claw.CloseClaw(),
                         pivot.PivotDown(),
-                        pivot.PivotDown2(),
+                        trajectoryActionChosen3,
                         trajectoryActionCloseOut
                 )
         );
@@ -132,13 +137,13 @@ public class RedRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    lift.setPower(-0.8);
+                    lift.setPower(-0.2);
                     initialized = true;
                 }
 
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos > 1700) {
+                if (pos > 2500) {
                     return true;
                 } else {
                     lift.setPower(0);
@@ -156,7 +161,7 @@ public class RedRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    lift.setPower(-0.3);
+                    lift.setPower(-0.8);
                     initialized = true;
                 }
 
@@ -199,7 +204,7 @@ public class RedRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 claw.setPower(-1);
-                sleep(2000);
+                sleep(5000);
                 return false;
             }
         }

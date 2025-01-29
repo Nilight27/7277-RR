@@ -20,7 +20,7 @@ import com.sun.tools.javac.comp.Todo;
 *
 * This guide is also made in context that you know the basics of java, so keep up.
 */
-
+@Disabled
 @TeleOp
 public class BasicDriveCode extends LinearOpMode {
 
