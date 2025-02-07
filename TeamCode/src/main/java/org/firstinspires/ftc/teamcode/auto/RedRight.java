@@ -33,7 +33,7 @@ public class RedRight extends LinearOpMode {
 
         Pose2d initialPose = new Pose2d(10, -72,Math.PI/2);
         Pose2d initialPose2 = new Pose2d(10, -65,Math.PI/2);
-        Pose2d initialPose3 = new Pose2d(10, -40,Math.PI/2);
+        Pose2d initialPose3 = new Pose2d(10, -43,Math.PI/2);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Pivot pivot = new Pivot(hardwareMap);
         Claw claw = new Claw(hardwareMap);
@@ -43,18 +43,15 @@ public class RedRight extends LinearOpMode {
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
                 .lineToY(-65);
 
-        TrajectoryActionBuilder tab2 = tab1.endTrajectory().fresh()
-                .lineToY(-42);
+        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose2)
+                .lineToY(-43);
 
-        TrajectoryActionBuilder tab3 = tab2.endTrajectory().fresh()
-                .waitSeconds(2)
-                .lineToY(-50);
-
+        TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
+                .lineToY(-45);
 
 
 
-        Action trajectoryActionCloseOut = tab3.endTrajectory().fresh()
-                .turnTo(Math.PI)
+        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
                 .setTangent(0)
                 .lineToX(60)
                 .build();
@@ -67,10 +64,8 @@ public class RedRight extends LinearOpMode {
 
         Action trajectoryActionChosen;
         Action trajectoryActionChosen2;
-        Action trajectoryActionChosen3;
         trajectoryActionChosen = tab1.build();
         trajectoryActionChosen2 = tab2.build();
-        trajectoryActionChosen3 = tab3.build();
 
         Actions.runBlocking(
                 new SequentialAction(
@@ -79,7 +74,6 @@ public class RedRight extends LinearOpMode {
                         trajectoryActionChosen2,
                         claw.CloseClaw(),
                         pivot.PivotDown(),
-                        trajectoryActionChosen3,
                         trajectoryActionCloseOut
                 )
         );
@@ -128,7 +122,7 @@ public class RedRight extends LinearOpMode {
         }
 
         public Action PivotUp() {
-            return new Pivot.PivotUp();
+            return new PivotUp();
         }
 
         public class PivotDown implements Action {
@@ -137,13 +131,13 @@ public class RedRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    lift.setPower(-0.2);
+                    lift.setPower(-0.8);
                     initialized = true;
                 }
 
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos > 2500) {
+                if (pos > 1700) {
                     return true;
                 } else {
                     lift.setPower(0);
@@ -153,7 +147,7 @@ public class RedRight extends LinearOpMode {
         }
 
         public Action PivotDown() {
-            return new Pivot.PivotDown();
+            return new PivotDown();
         }
         public class PivotDown2 implements Action {
             private boolean initialized = false;
@@ -161,7 +155,7 @@ public class RedRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    lift.setPower(-0.8);
+                    lift.setPower(-0.3);
                     initialized = true;
                 }
 
@@ -176,7 +170,7 @@ public class RedRight extends LinearOpMode {
             }
         }
         public Action PivotDown2() {
-            return new Pivot.PivotDown2();
+            return new PivotDown2();
         }
 
     }
@@ -197,21 +191,20 @@ public class RedRight extends LinearOpMode {
         }
 
         public Action CloseClaw() {
-            return new Claw.CloseClaw();
+            return new CloseClaw();
         }
 
         public class OpenClaw implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 claw.setPower(-1);
-                sleep(5000);
+                sleep(2000);
                 return false;
             }
         }
 
         public Action OpenClaw() {
-            return new Claw.OpenClaw();
+            return new OpenClaw();
         }
     }
 }
-

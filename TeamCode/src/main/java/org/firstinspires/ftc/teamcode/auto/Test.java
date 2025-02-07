@@ -266,7 +266,7 @@ public class Test extends LinearOpMode {
             private boolean initialized = false;
 
             public void move(){
-                double target2 = 130;
+                double target2 = 130;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
                 controller1.setPID(p,i,d);
                 int pivotPos = lift.getCurrentPosition();
                 double pid = controller1.calculate(pivotPos, target2);
@@ -380,4 +380,3 @@ public class Test extends LinearOpMode {
         }
     }
 }
-

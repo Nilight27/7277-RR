@@ -26,25 +26,42 @@ public class BlueLeft extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         Pose2d initialPose = new Pose2d(10, 72,(3*Math.PI)/2);
+        Pose2d initialPose2 = new Pose2d(51, 66,(3*Math.PI)/4);
+        Pose2d initialPose3 = new Pose2d(48, 66,(3*Math.PI)/2);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Pivot pivot = new Pivot(hardwareMap);
         Claw claw = new Claw(hardwareMap);
+        Extender extender = new Extender(hardwareMap);
+
 
 
         // actionBuilder builds from the drive steps passed to it
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .lineToY(65)
+                .lineToY(66)
                 .setTangent(0)
-                .lineToXConstantHeading(46)
-                .lineToXLinearHeading(55, (5*Math.PI)/4);
+                .lineToXLinearHeading(51, (5*Math.PI)/4);
+
+
+        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose2)
+                .setTangent(0)
+                .lineToXLinearHeading(43, (3*Math.PI)/2)
+                .waitSeconds(2)
+                .setTangent((3*Math.PI))
+                .lineToY(-48);
+
+
+        TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
+                .lineToY(-43);
 
 
 
-        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
+
+
+        Action trajectoryActionCloseOut = tab3.endTrajectory().fresh()
 //                .setTangent(0)
-//                .lineToXLinearHeading(-36, -Math.PI/4)
+//                .lineToXLinearHeading(-48, -Math.PI/2)
 //                .setTangent(Math.PI/2)
-//                .lineToY(0)
+//                .lineToY(-24)
                 .build();
 
 
@@ -60,11 +77,14 @@ public class BlueLeft extends LinearOpMode {
                 new SequentialAction(
                         trajectoryActionChosen,
                         pivot.PivotUp(),
+                        extender.ExtendUp(),
                         claw.OpenClaw(),
+                        extender.ExtendDown(),
                         trajectoryActionCloseOut
                 )
         );
     }
+
     public class Pivot {
         private PIDController controller1, controller2;
 
@@ -95,7 +115,7 @@ public class BlueLeft extends LinearOpMode {
                 // checks lift's current position
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos < 2500) {
+                if (pos < 2800) {
                     // true causes the action to rerun
                     return true;
                 } else {
@@ -109,7 +129,7 @@ public class BlueLeft extends LinearOpMode {
         }
 
         public Action PivotUp() {
-            return new Pivot.PivotUp();
+            return new PivotUp();
         }
 
         public class LiftDown implements Action {
@@ -118,13 +138,13 @@ public class BlueLeft extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    lift.setPower(-0.8);
+                    lift.setPower(-0.5);
                     initialized = true;
                 }
 
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos > 200) {
+                if (pos > 300) {
                     return true;
                 } else {
                     lift.setPower(0);
@@ -134,9 +154,31 @@ public class BlueLeft extends LinearOpMode {
         }
 
         public Action liftDown() {
-            return new Pivot.LiftDown();
+            return new LiftDown();
         }
 
+        public class Coast implements Action{
+            private boolean initialized = false;
+            public void move(){
+                lift.setPower(0.1);
+                sleep(100);
+                lift.setPower(0);
+            }
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                if (!initialized) {
+                    lift.setPower(0.1);
+                    initialized = true;
+                }
+
+                move();
+                return false;
+            }
+        }
+        public Action Coast() {
+            return new Coast();
+        }
 
 
     }
@@ -152,12 +194,13 @@ public class BlueLeft extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket packet) {
                 claw.setPower(1.0);
                 sleep(2000);
+                claw.setPower(0);
                 return false;
             }
         }
 
         public Action CloseClaw() {
-            return new Claw.CloseClaw();
+            return new CloseClaw();
         }
 
         public class OpenClaw implements Action {
@@ -165,12 +208,145 @@ public class BlueLeft extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket packet) {
                 claw.setPower(-1);
                 sleep(1000);
+                claw.setPower(0);
                 return false;
+
+
             }
         }
 
         public Action OpenClaw() {
-            return new Claw.OpenClaw();
+            return new OpenClaw();
+        }
+    }
+    public class ArmPIDF{
+        private PIDController controller1, controller2;
+
+        public double p = 0.05, i = 0, d = 0.001;
+        public double f = 0.0005, f2 = 0.01;
+        public static final double ticks = 1440;
+        private DcMotor lift;
+        public int target = 120;
+        public int target2 = 200;
+
+        public ArmPIDF(HardwareMap hardwareMap) {
+            lift = hardwareMap.get(DcMotor.class, "pivot");
+            controller1 = new PIDController(p, i, d);
+        }
+
+        public class ArmPIDFMove implements Action {
+            // checks if the lift motor has been powered on
+            private boolean initialized = false;
+            public void move(){
+                controller1.setPID(p,i,d);
+                int pivotPos = lift.getCurrentPosition();
+                double pid = controller1.calculate(pivotPos, target2);
+                double ff = Math.cos(Math.toRadians(target2/ticks)) * f;
+
+                double power = pid + ff;
+
+                lift.setPower(power);
+                sleep(5000);
+
+            }
+
+            // actions are formatted via telemetry packets as below
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                // powers on motor, if it is not on
+                if (!initialized) {
+                    initialized = true;
+                }
+
+                controller1.setPID(p,i,d);
+                int pivotPos = lift.getCurrentPosition();
+                double pid = controller1.calculate(pivotPos, target2);
+                double ff = Math.cos(Math.toRadians(target2/ticks)) * f;
+
+                double power = pid + ff;
+
+                lift.setPower(power);
+                sleep(5000);
+
+                return false;
+
+            }
+        }
+        public Action ArmPIDFMove() {
+            return new ArmPIDFMove();
+        }
+    }
+
+    public class Extender{
+        private DcMotor extend;
+
+        public Extender(HardwareMap hardwareMap) {
+            extend = hardwareMap.get(DcMotor.class, "arm");
+
+        }
+
+        public class ExtendUp implements Action{
+            private boolean initialized = false;
+
+            public void move(){
+                extend.setPower(-1);
+                sleep(1500);
+                extend.setPower(0);
+            }
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+                // powers on motor, if it is not on
+                if (!initialized) {
+                    extend.setPower(-0.8);
+                    initialized = true;
+                }
+
+                // checks lift's current position
+//                double pos = extend.getCurrentPosition();
+//                telemetryPacket.put("liftPos", pos);
+//                if (pos > -1000) {
+//                    // true causes the action to rerun
+//                    return true;
+//                } else {
+//                    // false stops action rerun
+//                    extend.setPower(0);
+//                    return false;
+//                }
+                move();
+                return false;
+                // overall, the action powers the lift until it surpasses
+                // 3000 encoder ticks, then powers it off
+            }
+
+        }
+        public Action ExtendUp(){
+            return new ExtendUp();
+        }
+
+        public class ExtendDown implements Action{
+
+            private boolean initialized = false;
+
+            public void move(){
+                extend.setPower(1);
+                sleep(1000);
+                extend.setPower(0);
+            }
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+
+                if (!initialized) {
+                    extend.setPower(0.8);
+                    initialized = true;
+                }
+
+                move();
+                return false;
+            }
+        }
+        public Action ExtendDown(){
+            return new ExtendDown();
         }
     }
 }
