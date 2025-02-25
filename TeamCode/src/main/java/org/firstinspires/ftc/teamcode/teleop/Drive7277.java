@@ -71,10 +71,7 @@ public class Drive7277 extends LinearOpMode {
             }
 
             if (change == 0){
-                double power = gamepad2.left_stick_y;
-                double powerA = gamepad2.left_stick_x;
-
-                arm.move(power, powerA, gamepad2.dpad_up, gamepad2.dpad_right, gamepad2.dpad_down);
+                arm.move(gamepad2.left_stick_y, gamepad2.left_stick_x, gamepad2.dpad_up, gamepad2.dpad_right, gamepad2.dpad_down);
             }
 
             if (change == 1){
