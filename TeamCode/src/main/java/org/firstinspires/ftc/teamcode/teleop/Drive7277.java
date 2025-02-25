@@ -21,11 +21,6 @@ import org.firstinspires.ftc.teamcode.mechanism.DriveTrain;
 public class Drive7277 extends LinearOpMode {
 
     private final ElapsedTime runtime = new ElapsedTime();
-    private Claw claw;
-    boolean check;
-    double speedLimiter = 1;
-    double limit = 1.65;
-    public Boolean movement;
     public PIDController controller1;
 
     public static double p = 0.05, i = 0, d = 0;
@@ -34,7 +29,6 @@ public class Drive7277 extends LinearOpMode {
     public static int target = 0, target2 = 0;
     public static final double ticks = 1440;
     public int change = 0;
-
 
 
     @Override
@@ -47,7 +41,6 @@ public class Drive7277 extends LinearOpMode {
         Arm arm = new Arm(hardwareMap);
         controller1 = new PIDController(p,i,d);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
 
         // Wait for the game to start (driver presses PLAY)
         telemetry.addData("Status", "Initialized");
@@ -62,7 +55,6 @@ public class Drive7277 extends LinearOpMode {
 
             double rotate = gamepad2.right_stick_x;
             claw.move(rotate);
-
 
             if (gamepad2.left_bumper){
                 change = 0;
