@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -27,7 +28,7 @@ public class BlueRight extends LinearOpMode {
 
         Pose2d initialPose = new Pose2d(-10, 72,(3*Math.PI)/2);
         Pose2d initialPose2 = new Pose2d(-10, 65,(3*Math.PI)/2);
-        Pose2d initialPose3 = new Pose2d(43, 65,(3*Math.PI)/2);
+        Pose2d initialPose3 = new Pose2d(10, 43,(3*Math.PI)/2);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Pivot pivot = new Pivot(hardwareMap);
         Claw claw = new Claw(hardwareMap);
@@ -41,7 +42,7 @@ public class BlueRight extends LinearOpMode {
                 .lineToY(43);
 
         TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
-                .lineToY(45);
+                .lineToY(55);
 
 
 
@@ -58,8 +59,10 @@ public class BlueRight extends LinearOpMode {
 
         Action trajectoryActionChosen;
         Action trajectoryActionChosen2;
+        Action trajectoryActionChosen3;
         trajectoryActionChosen = tab1.build();
         trajectoryActionChosen2 = tab2.build();
+        trajectoryActionChosen3 = tab3.build();
 
         Actions.runBlocking(
                 new SequentialAction(
@@ -68,6 +71,12 @@ public class BlueRight extends LinearOpMode {
                         trajectoryActionChosen2,
                         claw.CloseClaw(),
                         pivot.PivotDown(),
+                        new ParallelAction(
+                                claw.CloseClaw(),
+                                trajectoryActionChosen3
+
+                        ),
+                        claw.OpenClaw(),
                         trajectoryActionCloseOut
                 )
         );
@@ -149,13 +158,13 @@ public class BlueRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    lift.setPower(-0.3);
+                    lift.setPower(-0.8);
                     initialized = true;
                 }
 
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos > 1000) {
+                if (pos > 1700) {
                     return true;
                 } else {
                     lift.setPower(0);
@@ -192,7 +201,7 @@ public class BlueRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 claw.setPower(-1);
-                sleep(2000);
+                sleep(1000);
                 return false;
             }
         }

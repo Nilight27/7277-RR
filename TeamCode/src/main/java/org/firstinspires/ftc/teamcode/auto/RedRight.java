@@ -3,8 +3,13 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.roadrunner.AngularVelConstraint;
+import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.VelConstraint;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -22,6 +27,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 @Autonomous
 public class RedRight extends LinearOpMode {
     private PIDController controller1, controller2;
@@ -38,22 +46,25 @@ public class RedRight extends LinearOpMode {
         Pivot pivot = new Pivot(hardwareMap);
         Claw claw = new Claw(hardwareMap);
 
-
+        VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
+                new TranslationalVelConstraint(20.0),
+                new AngularVelConstraint(Math.PI/2)
+        ));
         // actionBuilder builds from the drive steps passed to it
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .lineToY(-65);
+                .lineToY(-65, baseVelConstraint);
 
         TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose2)
-                .lineToY(-43);
+                .lineToY(-43, baseVelConstraint);
 
         TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
-                .lineToY(-45);
+                .lineToY(-55, baseVelConstraint);
 
 
 
-        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
+        Action trajectoryActionCloseOut = tab3.endTrajectory().fresh()
                 .setTangent(0)
-                .lineToX(60)
+                .lineToX(60,baseVelConstraint)
                 .build();
 
 
@@ -64,8 +75,10 @@ public class RedRight extends LinearOpMode {
 
         Action trajectoryActionChosen;
         Action trajectoryActionChosen2;
+        Action trajectoryActionChosen3;
         trajectoryActionChosen = tab1.build();
         trajectoryActionChosen2 = tab2.build();
+        trajectoryActionChosen3 = tab3.build();
 
         Actions.runBlocking(
                 new SequentialAction(
@@ -74,6 +87,12 @@ public class RedRight extends LinearOpMode {
                         trajectoryActionChosen2,
                         claw.CloseClaw(),
                         pivot.PivotDown(),
+                        new ParallelAction(
+                                claw.CloseClaw(),
+                                trajectoryActionChosen3
+
+                        ),
+                        claw.OpenClaw(),
                         trajectoryActionCloseOut
                 )
         );
@@ -161,7 +180,7 @@ public class RedRight extends LinearOpMode {
 
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos > 1000) {
+                if (pos > 1800) {
                     return true;
                 } else {
                     lift.setPower(0);
@@ -198,7 +217,7 @@ public class RedRight extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 claw.setPower(-1);
-                sleep(2000);
+                sleep(1000);
                 return false;
             }
         }

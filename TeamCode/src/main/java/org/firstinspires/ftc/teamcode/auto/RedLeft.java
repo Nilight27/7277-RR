@@ -37,7 +37,7 @@ public class RedLeft extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         Pose2d initialPose = new Pose2d(-10, -72,Math.PI/2);
-        Pose2d initialPose2 = new Pose2d(-51, -68,Math.PI/4);
+        Pose2d initialPose2 = new Pose2d(-51, -65,Math.PI/4);
         Pose2d initialPose3 = new Pose2d(-48, -66,Math.PI/2);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Pivot pivot = new Pivot(hardwareMap);
@@ -48,7 +48,7 @@ public class RedLeft extends LinearOpMode {
 
         // actionBuilder builds from the drive steps passed to it
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .lineToY(-68)
+                .lineToY(-65)
                 .setTangent(0)
                 .lineToXLinearHeading(-51, Math.PI/4);
 
@@ -56,16 +56,19 @@ public class RedLeft extends LinearOpMode {
         TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose2)
                 .setTangent(0)
                 .lineToXLinearHeading(-43, Math.PI/2)
-                .waitSeconds(2)
                 .setTangent(Math.PI/2)
-                .lineToY(-48);
+                .lineToY(-60)
+                .waitSeconds(1)
+                .lineToY(-55)
+                .waitSeconds(1)
+                .lineToY(-50);
 
 
         TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
                 .lineToY(-43);
 
 
-        Action trajectoryActionCloseOut = tab3.endTrajectory().fresh()
+        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
 //                .setTangent(0)
 //                .lineToXLinearHeading(-48, -Math.PI/2)
 //                .setTangent(Math.PI/2)
@@ -89,7 +92,9 @@ public class RedLeft extends LinearOpMode {
                 new SequentialAction(
                         trajectoryActionChosen,
                         pivot.PivotUp(),
+                        extender.ExtendUp(),
                         claw.OpenClaw(),
+                        extender.ExtendDown(),
                         pivot.liftDown(),
 //                        trajectoryActionChosen2,
 //                        claw.CloseClaw(),
@@ -134,7 +139,7 @@ public class RedLeft extends LinearOpMode {
                 // checks lift's current position
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos < 2800) {
+                if (pos < 2700) {
                     // true causes the action to rerun
                     return true;
                 } else {
@@ -163,7 +168,7 @@ public class RedLeft extends LinearOpMode {
 
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos > 300) {
+                if (pos > 600) {
                     return true;
                 } else {
                     lift.setPower(0);
@@ -357,7 +362,7 @@ public class RedLeft extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket telemetryPacket) {
 
                 if (!initialized) {
-                    extend.setPower(0.8);
+                    extend.setPower(1);
                     initialized = true;
                 }
 

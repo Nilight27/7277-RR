@@ -37,27 +37,27 @@ public class BlueLeft extends LinearOpMode {
 
         // actionBuilder builds from the drive steps passed to it
         TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                .lineToY(66)
+                .lineToY(65)
                 .setTangent(0)
                 .lineToXLinearHeading(51, (5*Math.PI)/4);
 
 
-        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose2)
-                .setTangent(0)
-                .lineToXLinearHeading(43, (3*Math.PI)/2)
-                .waitSeconds(2)
-                .setTangent((3*Math.PI))
-                .lineToY(-48);
+//        TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose2)
+//                .setTangent(0)
+//                .lineToXLinearHeading(43, (3*Math.PI)/2)
+//                .waitSeconds(2)
+//                .setTangent((3*Math.PI))
+//                .lineToY(-48);
+//
+//
+//        TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
+//                .lineToY(-43);
 
 
-        TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose3)
-                .lineToY(-43);
 
 
 
-
-
-        Action trajectoryActionCloseOut = tab3.endTrajectory().fresh()
+        Action trajectoryActionCloseOut = tab1.endTrajectory().fresh()
 //                .setTangent(0)
 //                .lineToXLinearHeading(-48, -Math.PI/2)
 //                .setTangent(Math.PI/2)
@@ -80,6 +80,7 @@ public class BlueLeft extends LinearOpMode {
                         extender.ExtendUp(),
                         claw.OpenClaw(),
                         extender.ExtendDown(),
+                        pivot.liftDown(),
                         trajectoryActionCloseOut
                 )
         );
@@ -115,7 +116,7 @@ public class BlueLeft extends LinearOpMode {
                 // checks lift's current position
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos < 2800) {
+                if (pos < 2700) {
                     // true causes the action to rerun
                     return true;
                 } else {
@@ -144,7 +145,7 @@ public class BlueLeft extends LinearOpMode {
 
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
-                if (pos > 300) {
+                if (pos > 600) {
                     return true;
                 } else {
                     lift.setPower(0);

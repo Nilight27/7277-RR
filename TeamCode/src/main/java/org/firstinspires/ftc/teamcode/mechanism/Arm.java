@@ -1,10 +1,7 @@
 package org.firstinspires.ftc.teamcode.mechanism;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
+import static android.os.SystemClock.sleep;
 
-import androidx.annotation.NonNull;
-
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -52,20 +49,26 @@ public class Arm {
     }
 
     public Action moveTo(int target) {
-        boolean inizalized = true;
 
-        if(inizalized) {
-            controller1.setPID(p, i, d);
-            int pivotPos = pivot.getCurrentPosition();
-            double pid = controller1.calculate(pivotPos, target);
-            double ff = Math.cos(Math.toRadians(target / ticks)) * f;
+        controller1.setPID(p, i, d);
+        int pivotPos = pivot.getCurrentPosition();
+        double pid = controller1.calculate(pivotPos, target);
+        double ff = Math.cos(Math.toRadians(target / ticks)) * f;
 
-            double power = pid + ff;
-            pivot.setPower(power);
-        }
+        double power = pid + ff;
+        pivot.setPower(power);
 
 
         return null;
+    }
+
+    public void autoMove(double power, int time){
+        pivot.setPower(power);
+        sleep(time);
+    }
+    public void lift(){
+        autoMove(-1, 3000);
+        autoMove(-0.3,10000);
     }
 
 }
